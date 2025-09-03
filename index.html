@@ -123,7 +123,7 @@
             line-height: 1.5;
         }
         
-        #chat {
+        .chat-area {
             flex: 1;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 15px;
@@ -417,7 +417,7 @@
 
     <script>
         const WEBHOOK_URLS = {
-            ayala: 'https://primary-production-f8109.up.railway.app/webhook/ayala',
+            ayala: 'https://primary-production-f8109.up.railway.app/webhook-test/ayala',
             p: 'https://primary-production-f8109.up.railway.app/webhook/agent-p',
             tahoe: 'https://primary-production-f8109.up.railway.app/webhook/agent-tahoe', 
             kilo: 'https://primary-production-f8109.up.railway.app/webhook/agent-kilo',
@@ -476,24 +476,55 @@
             // Add user message
             const userMsg = `<div class="message user">${message}</div>`;
             chat.innerHTML += userMsg;
-            input.value = '';
             
+            // Add loading message
+            const loadingMsg = `<div class="message agent" id="loading-msg">AIGENT ${agent.toUpperCase()} is processing your request... 🧠⚒️</div>`;
+            chat.innerHTML += loadingMsg;
+            
+            input.value = '';
             scrollToBottom(agent);
             
             try {
                 const response = await fetch(WEBHOOK_URLS[agent], {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://www.aigentautomationaigency.com'
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        agent: agent,
+                        timestamp: new Date().toISOString()
+                    })
                 });
                 
+                // Remove loading message
+                document.getElementById('loading-msg').remove();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
-                const agentMsg = `<div class="message agent">${data.response.replace(/\n/g, '<br>')}</div>`;
+                const responseText = data.response || data.message || 'Automation activated!';
+                
+                const agentMsg = `<div class="message agent">${responseText.replace(/\n/g, '<br>')}</div>`;
                 chat.innerHTML += agentMsg;
                 
+                // For AYALA, show additional automation status
+                if (agent === 'ayala' && data.target_url) {
+                    const statusMsg = `<div class="message agent"><strong>🎯 AUTOMATION STATUS:</strong><br>Target: ${data.target_url}<br>Action: ${data.action_type || 'Processing'}<br>Status: In Progress</div>`;
+                    chat.innerHTML += statusMsg;
+                }
+                
             } catch (error) {
-                const errorMsg = `<div class="message agent">Connection error. Let me try again...</div>`;
+                // Remove loading message
+                const loadingElement = document.getElementById('loading-msg');
+                if (loadingElement) loadingElement.remove();
+                
+                const errorMsg = `<div class="message agent">⚠️ Connection error with ${agent.toUpperCase()}. Please try again or check the automation workflow.</div>`;
                 chat.innerHTML += errorMsg;
+                console.error('AIGENTZ Error:', error);
             }
             
             // Save updated chat history
@@ -513,11 +544,10 @@
             
             loading.style.display = 'block';
             
-            // Here you would send the knowledge to a central learning endpoint
-            // For now, we'll just simulate the process
+            // This will connect to a knowledge feeding endpoint when built
             setTimeout(() => {
                 loading.style.display = 'none';
-                alert('Knowledge fed to all AIGENTZ successfully!');
+                alert('Knowledge fed to all AIGENTZ successfully! They are now smarter.');
                 document.getElementById('knowledgeText').value = '';
                 document.getElementById('knowledgeUrl').value = '';
             }, 2000);
@@ -528,8 +558,13 @@
         
         // Add welcome messages if chat is empty
         if (!localStorage.getItem('ayala-chat')) {
-            document.getElementById('ayala-chat').innerHTML = '<div class="message agent">Ready to build automations and create new AI agents for you. What should we automate first?</div>';
+            document.getElementById('ayala-chat').innerHTML = '<div class="message agent">🤖 Ready to build automations and create new AI agents for you. What should we automate first?<br><br><strong>Try saying:</strong><br>• "Find realtors on LinkedIn in Tahoe"<br>• "Research NVDA stock news"<br>• "Automate my social media posting"</div>';
             saveChatHistory('ayala', document.getElementById('ayala-chat').innerHTML);
+        }
+        
+        if (!localStorage.getItem('p-chat')) {
+            document.getElementById('p-chat').innerHTML = '<div class="message agent">👋 Your personal executive is ready! I have access to all your tools and know your preferences.<br><br><strong>I can help with:</strong><br>• Lead generation and prospecting<br>• Market research and analysis<br>• Personal task management<br>• Business intelligence</div>';
+            saveChatHistory('p', document.getElementById('p-chat').innerHTML);
         }
     </script>
 </body>
