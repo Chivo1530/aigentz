@@ -28,6 +28,7 @@ app.add_middleware(
 # Environment variables (set in Railway)
 SHOPIFY_API_KEY = os.getenv("SHOPIFY_API_KEY", "458d4a6e01ef890cef4305791ef31de4")
 SHOPIFY_API_SECRET = os.getenv("SHOPIFY_API_SECRET", "B216afc930787527e06ad796b57716d7")
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 DATABASE_URL = os.getenv("DATABASE_URL", "your_supabase_connection_string")
 
 openai.api_key = OPENAI_API_KEY
