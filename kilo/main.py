@@ -29,7 +29,7 @@ app.add_middleware(
 SHOPIFY_API_KEY = os.getenv("SHOPIFY_API_KEY", "458d4a6e01ef890cef4305791ef31de4")
 SHOPIFY_API_SECRET = os.getenv("SHOPIFY_API_SECRET", "B216afc930787527e06ad796b57716d7")
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-DATABASE_URL = os.getenv("DATABASE_URL", "your_supabase_connection_string")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres.cxamytynecjtrxliqkcn:Ilovemijeffita1.@aws-1-us-east-1.pooler.supabase.com:6543/postgres")
 
 openai.api_key = OPENAI_API_KEY
 
